@@ -42,16 +42,13 @@ export default class App extends React.Component {
       </View> 
       :
       <View style={{flex: 1, backgroundColor: 'blue' }}>
-      {/* <FlatList
+      <FlatList
         horizontal
         pagingEnabled
         data={this.state.images}
         renderItem={({ item }) => this.renderItem(item)}
         keyExtractor={item => item.id}
-      /> */}
-     <Text>
-          If you like React, you'll also like React Native.
-        </Text>
+      />
     </View>
     );
   }
