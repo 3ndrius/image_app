@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ActivityIndicator, FlatList, Dimensions, Image } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, FlatList, Dimensions, Image } from 'react-native';
 import axios from 'axios';
 import {  publicKey} from './config';
 
@@ -23,24 +23,25 @@ export default class App extends React.Component {
          console.log(error);
        })
        .finally( () => {
-         console.log('request completed');
+         console.log("Work");
        });
   }
   renderItem(image) {
     return <View style={{ height, width }}> <Image style={{flex:1,height:null, width:null}} source={{uri: image.urls.regular}}  /></View>
+    console.log(image);
   }
   componentDidMount = () =>{
     this.loadImages();
   }
   render() {
-    console.log("Data", this.state.images);
+  
     return (
       this.state.isLoading ? 
       <View style={{flex:1, backgroundColor:'black', alignItems:'center', justifyContent:'center' }}>
         <ActivityIndicator size='large' color="gray" />
       </View> 
       :
-      <View style={{ flex: 1, backgroundColor: 'yellow' }}>
+      <View style={{flex: 1, backgroundColor: 'blue' }}>
       <FlatList
         horizontal
         pagingEnabled
