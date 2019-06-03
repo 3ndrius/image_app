@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ActivityIndicator, FlatList, Dimensions, Image } from 'react-native';
 import axios from 'axios';
-import {  publicKey} from './config';
+import {  publicKey } from './config';
 
 const { height, width} = Dimensions.get('window');
 
@@ -27,7 +27,7 @@ export default class App extends React.Component {
        });
   }
   renderItem(image) {
-    return <View style={{ height, width }}> <Image style={{flex:1,height:null, width:null}} source={{uri: image.urls.regular}}  /></View>
+    return <View style={{ height, width }}><Image style={{flex:1,height:null, width:null}} source={{uri:image.urls.regular}}/></View>
     console.log(image);
   }
   componentDidMount = () =>{
@@ -39,17 +39,14 @@ export default class App extends React.Component {
       this.state.isLoading ? 
       <View style={{flex:1, backgroundColor:'black', alignItems:'center', justifyContent:'center' }}>
         <ActivityIndicator size='large' color="gray" />
-      </View> 
-      :
+      </View>:
       <View style={{flex: 1, backgroundColor: 'blue' }}>
       <FlatList
         horizontal
         pagingEnabled
         data={this.state.images}
         renderItem={({ item }) => this.renderItem(item)}
-        keyExtractor={item => item.id}
-      />
-    </View>
+        keyExtractor={item => item.id}/></View>
     );
   }
 }
