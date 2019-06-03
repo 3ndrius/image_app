@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ActivityIndicator, FlatList, Dimensions, Image } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, FlatList, Dimensions, Image, TouchableWithoutFeedback } from 'react-native';
 import axios from 'axios';
 import {  publicKey } from './config';
 
@@ -9,7 +9,9 @@ export default class App extends React.Component {
 
   state ={
     isLoading:true,
-    images: []
+    images: [],
+    scale: new Animated.Value(1),
+    isImageFocused: false
   }
   loadImages = () => {
        axios
@@ -26,9 +28,28 @@ export default class App extends React.Component {
          console.log("Work");
        });
   }
-  renderItem(image) {
-    return <View style={{ height, width }}><Image style={{flex:1,height:null, width:null}} source={{uri:image.urls.regular}}/></View>
-    console.log(image);
+  this.state.scale = {
+    transform: [{scale: this.state.scale}]
+  }
+  showControls = (item) => {
+    this.setState((state) => {
+      isImageFocused: !state.isImageFocused
+    }),()=> {
+      if(this.state.isImageFocused) {
+        Animated.spring(this.state.scale, {
+          toValue: 0.8
+        }).start()
+      }
+      else{
+        Animated.spring(this.state.scale, {
+          toValue:1
+        }).start()
+      }
+    }
+  }
+  renderItem = ({item}) => {
+    return <View style={{ height, width }}><Image style={{flex:1,height:null, width:null}} source={{uri:item.urls.regular}}/></View>
+   
   }
   componentDidMount = () =>{
     this.loadImages();
@@ -40,13 +61,16 @@ export default class App extends React.Component {
       <View style={{flex:1, backgroundColor:'black', alignItems:'center', justifyContent:'center' }}>
         <ActivityIndicator size='large' color="gray" />
       </View>:
-      <View style={{flex: 1, backgroundColor: 'blue' }}>
+      <TouchableWithoutFeedback onPress={() => {showControls(item)}}>
+      <Animated.View style={[{flex: 1, backgroundColor: 'white' }, this.scale]}>
       <FlatList
         horizontal
         pagingEnabled
         data={this.state.images}
-        renderItem={({ item }) => this.renderItem(item)}
-        keyExtractor={item => item.id}/></View>
+        renderItem={this.renderItem}
+        keyExtractor={item => item.id}/>
+        </Animated.View>
+        </TouchableWithoutFeedback>
     );
   }
 }
