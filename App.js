@@ -9,8 +9,12 @@ import {
   Image,
   Animated,
   TouchableWithoutFeedback,
-  TouchableOpacity
+  TouchableOpacity,
+  CameraRoll,
+  Share
 } from 'react-native';
+
+import { Permissions, FileSystem } from 'expo';
 
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +37,10 @@ export default class App extends React.Component {
       inputRange: [0.9, 1],
       outputRange: [0, -80]
     });
+    this.borderRadius = this.state.scale.interpolate({
+      inputRange: [0.9, 1],
+      outputRange: [30, 0]
+    });
   }
 
   loadWallpapers = () => {
@@ -42,7 +50,6 @@ export default class App extends React.Component {
       )
       .then(
         function(response) {
-          console.log(response.data);
           this.setState({ images: response.data, isLoading: false });
         }.bind(this)
       )
@@ -50,13 +57,35 @@ export default class App extends React.Component {
         console.log(error);
       })
       .finally(function() {
-        console.log('request completed');
       });
   };
 
   componentDidMount() {
     this.loadWallpapers();
   }
+
+  saveToCameraRoll = async image => {
+    let cameraPermissions = await Permissions.getAsync(Permissions.CAMERA_ROLL);
+    if (cameraPermissions.status !== 'granted') {
+      cameraPermissions = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+    }
+
+    if (cameraPermissions.status === 'granted') {
+      FileSystem.downloadAsync(
+        image.urls.regular,
+        FileSystem.documentDirectory + image.id + '.jpg'
+      )
+        .then(({ uri }) => {
+          CameraRoll.saveToCameraRoll(uri);
+          alert('Saved to photos');
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else {
+      alert('Requires cameral roll permission');
+    }
+  };
 
   showControls = item => {
     this.setState(
@@ -75,6 +104,16 @@ export default class App extends React.Component {
         }
       }
     );
+  };
+
+  shareWallpaper = async image => {
+    try {
+      await Share.share({
+        message: 'Checkout this wallpaper ' + image.urls.full
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   renderItem = ({ item }) => {
@@ -96,8 +135,13 @@ export default class App extends React.Component {
         </View>
         <TouchableWithoutFeedback onPress={() => this.showControls(item)}>
           <Animated.View style={[{ height, width }, this.scale]}>
-            <Image
-              style={{ flex: 1, height: null, width: null }}
+            <Animated.Image
+              style={{
+                flex: 1,
+                height: null,
+                width: null,
+                borderRadius: this.borderRadius
+              }}
               source={{ uri: item.urls.regular }}
             />
           </Animated.View>
@@ -119,7 +163,7 @@ export default class App extends React.Component {
           >
             <TouchableOpacity
               activeOpacity={0.5}
-              onPress={() => alert('load images')}
+              onPress={() => this.loadWallpapers()}
             >
               <Ionicons name="ios-refresh" color="white" size={40} />
             </TouchableOpacity>
@@ -129,7 +173,7 @@ export default class App extends React.Component {
           >
             <TouchableOpacity
               activeOpacity={0.5}
-              onPress={() => alert('load images')}
+              onPress={() => this.shareWallpaper(item)}
             >
               <Ionicons name="ios-share" color="white" size={40} />
             </TouchableOpacity>
@@ -139,7 +183,7 @@ export default class App extends React.Component {
           >
             <TouchableOpacity
               activeOpacity={0.5}
-              onPress={() => alert('load images')}
+              onPress={() => this.saveToCameraRoll(item)}
             >
               <Ionicons name="ios-save" color="white" size={40} />
             </TouchableOpacity>
